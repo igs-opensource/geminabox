@@ -34,14 +34,17 @@ require 'capybara/mechanize'
 require 'capybara/dsl'
 
 require 'minitest/reporters'
-if ENV['MINITEST_REPORTER']
-  Minitest::Reporters.use!
-else
-  Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+unless ENV['RM_INFO']
+  if ENV['MINITEST_REPORTER']
+    Minitest::Reporters.use!
+  else
+    Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+  end
 end
 
 require 'webmock/minitest'
-WebMock.disable_net_connect!(:allow_localhost => true)
+# WebMock.disable_net_connect!(:allow_localhost => true)
+WebMock.allow_net_connect!
 
 Capybara.default_driver = :mechanize
 Capybara.app_host = "http://localhost"

@@ -11,7 +11,7 @@ module Geminabox
       end
       @api = CompactIndexApi.new
       @remote_api = Minitest::Mock.new
-      @api.instance_variable_set :@api, @remote_api
+      # @api.instance_variable_set :@api, @remote_api
       @api.cache.flush_all
       reindex
     end
@@ -87,7 +87,7 @@ module Geminabox
 
     def test_remote_versions
       Geminabox.rubygems_proxy = true
-      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:download_versions, [200, remote_versions], [nil, @api.cache])
       combined_versions = @api.versions
       assert_match(/a 1.0.0 \S{32}\nb 1.0.0 \S{32}\nr 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
       @remote_api.verify
@@ -98,7 +98,7 @@ module Geminabox
 
       @api.cache.store("versions", remote_versions)
       etag = @api.cache.md5("versions")
-      @remote_api.expect(:fetch_versions, [304, remote_versions], [etag])
+      @remote_api.expect(:download_versions, [304, nil], [etag])
       combined_versions = @api.versions
       assert_match(/a 1.0.0 \S{32}\nb 1.0.0 \S{32}\nr 1.0.0 \S{32}\nz 1.0.0 \S{32}\n/, combined_versions)
       @remote_api.verify
@@ -142,7 +142,7 @@ module Geminabox
       Geminabox.rubygems_proxy = true
       reindex
 
-      @remote_api.expect(:fetch_versions, [200, conflicting_remote_versions], [nil])
+      @remote_api.expect(:download_versions, [200, conflicting_remote_versions], [nil, @api.cache])
       versions = @api.versions
       assert_match(/\Acreated_at:.+\n---\na 2.0.0 \S{32}\nb 1.0.0 \S{32}\nz 1.0.0 \S{32}\n\z/, versions)
       @remote_api.verify
@@ -161,7 +161,7 @@ module Geminabox
       checksum = Digest::MD5.hexdigest(local_gem_info)
       remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
 
-      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:download_versions, [200, remote_versions], [nil, @api.cache])
       @remote_api.expect(:fetch_info, [200, local_gem_info], ["b", nil])
       refute @api.cache.read("gems/b-1.0.0.gem")
       refute @api.cache.read("gems/z-1.0.0.gem")
@@ -185,7 +185,7 @@ module Geminabox
       checksum = Digest::MD5.hexdigest(remote_gem_info)
       remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
 
-      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:download_versions, [200, remote_versions], [nil, @api.cache])
       @remote_api.expect(:fetch_info, [200, remote_gem_info], ["b", nil])
 
       @api.remove_proxied_gems_from_local_index
@@ -214,7 +214,7 @@ module Geminabox
       checksum = Digest::MD5.hexdigest(remote_gem_info)
       remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
 
-      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:download_versions, [200, remote_versions], [nil, @api.cache])
       @remote_api.expect(:fetch_info, [200, remote_gem_info], ["b", nil])
 
       @api.remove_proxied_gems_from_local_index

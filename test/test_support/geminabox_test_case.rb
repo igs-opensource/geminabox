@@ -217,7 +217,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def log_to_stdout?
-    Minitest::Reporters.reporters.any?{|reporter| reporter.instance_of?(Minitest::Reporters::SpecReporter)}
+    Minitest::Reporters.reporters&.any?{|reporter| reporter.instance_of?(Minitest::Reporters::SpecReporter)} || ENV['RM_INFO']
   end
 
   def start_app!
@@ -271,6 +271,7 @@ class Geminabox::TestCase < Minitest::Test
 
   def stop_app!
     Process.kill(1, @app_server) if @app_server
+    @app_server.kill if @app_server.is_a? Thread
   end
 
   def gem_file(*args)
