@@ -11,14 +11,12 @@ module Geminabox
     end
 
     def names
-      local_gem_list = Set.new(all_gems.list)
-      return format_gem_names(local_gem_list) unless Geminabox.rubygems_proxy
-
-      remote_name_data = remote_names
-      return format_gem_names(local_gem_list) unless remote_name_data
-
-      remote_gem_list = remote_name_data.split("\n")[1..-1]
-      format_gem_names(local_gem_list.merge(remote_gem_list))
+      gem_list = Set.new(all_gems.list)
+      if Geminabox.rubygems_proxy
+        remote_gem_list = remote_names&.split("\n")[1..-1]
+        gem_list = gem_list.merge(remote_gem_list) if remote_gem_list
+      end
+      format_gem_names(gem_list)
     end
 
     def local_names

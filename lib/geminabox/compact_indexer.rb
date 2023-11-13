@@ -66,7 +66,11 @@ module Geminabox
 
     def fetch_versions
       path = versions_path
-      File.binread(path) if File.exist?(path)
+      if File.exist?(path)
+        File.binread(path)
+      else
+        reindex
+      end
     end
 
     def reindex(specs = nil)
