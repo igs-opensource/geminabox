@@ -55,7 +55,7 @@ module Geminabox
       inject_gems do |builder|
         builder.gem "x"
       end
-      refute CompactIndexApi.new.local_versions
+      assert CompactIndexApi.new.local_versions
     end
 
     def test_local_for_standalone_server

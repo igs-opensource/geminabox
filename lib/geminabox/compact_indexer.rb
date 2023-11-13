@@ -70,6 +70,7 @@ module Geminabox
         File.binread(path)
       else
         reindex
+        File.binread(path)
       end
     end
 
