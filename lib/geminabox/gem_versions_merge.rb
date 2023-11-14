@@ -38,14 +38,14 @@ module Geminabox
 
     def self.write_version_entries(local_gem_io, remote_version_io)
       try_load_cached_file('w') do |merged_versions_file|
-        local_gem_list = local_gem_io.readlines.map { |it| it.split[0] }
+        local_gem_list = local_gem_io.readlines[1..-1].map { |it| it.split[0] }
         local_gem_io.rewind
         local_gem_io.readline # advance past preamble since we're writing our own merged versions file
-        preamble = "created at: #{Time.now}"
+        preamble = "created_at: #{Time.now}"
         merged_versions_file.flock(File::LOCK_EX)
-        merged_versions_file.write("#{preamble}")
+        merged_versions_file.write("#{preamble}\n")
         merged_versions_file.write(local_gem_io.readline) # get the ---
-        current_local_gem = local_gem_io.readline
+        current_local_gem = local_gem_list.any? ? local_gem_io.readline : nil
         remote_version_io.each_line do |remote_version_line|
           next if remote_version_line.eql?("---\n")
           remote_gem_name = remote_version_line.split[0]
