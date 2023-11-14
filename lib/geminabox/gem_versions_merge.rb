@@ -29,7 +29,7 @@ module Geminabox
             end
           end
 
-          write_version_entries(preamble, local_io, remote_versions_file)
+          write_version_entries(local_io, remote_versions_file)
           File.read(merged_versions_path)
         end
       end
