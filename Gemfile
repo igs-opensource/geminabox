@@ -7,6 +7,7 @@ end
 group :test do
   gem 'minitest'
   gem 'minitest-reporters'
+  gem 'minitest-stub-const'
   gem 'rack-test'
   gem 'rake'
 

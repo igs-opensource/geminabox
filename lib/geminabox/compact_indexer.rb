@@ -5,7 +5,7 @@ module Geminabox
 
     module PathMethods
       def index_path
-        File.expand_path(File.join(datadir, 'compact_index'))
+        File.expand_path(File.join(Geminabox.data, 'compact_index'))
       end
 
       def versions_path
@@ -14,6 +14,10 @@ module Geminabox
 
       def merged_versions_path
         File.join(index_path, 'merged_versions')
+      end
+
+      def proxy_versions_path
+        File.join(Geminabox.data, 'remote_cache', 'versions')
       end
 
       def info_path
@@ -62,7 +66,12 @@ module Geminabox
 
     def fetch_versions
       path = versions_path
-      File.binread(path) if File.exist?(path)
+      if File.exist?(path)
+        File.binread(path)
+      else
+        reindex
+        File.binread(path)
+      end
     end
 
     def reindex(specs = nil)

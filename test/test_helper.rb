@@ -34,10 +34,12 @@ require 'capybara/mechanize'
 require 'capybara/dsl'
 
 require 'minitest/reporters'
-if ENV['MINITEST_REPORTER']
-  Minitest::Reporters.use!
-else
-  Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+unless ENV['RM_INFO']
+  if ENV['MINITEST_REPORTER']
+    Minitest::Reporters.use!
+  else
+    Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+  end
 end
 
 require 'webmock/minitest'

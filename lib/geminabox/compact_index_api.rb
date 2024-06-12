@@ -11,14 +11,12 @@ module Geminabox
     end
 
     def names
-      local_gem_list = Set.new(all_gems.list)
-      return format_gem_names(local_gem_list) unless Geminabox.rubygems_proxy
-
-      remote_name_data = remote_names
-      return format_gem_names(local_gem_list) unless remote_name_data
-
-      remote_gem_list = remote_name_data.split("\n")[1..-1]
-      format_gem_names(local_gem_list.merge(remote_gem_list))
+      gem_list = Set.new(all_gems.list)
+      if Geminabox.rubygems_proxy
+        remote_gem_list = remote_names&.split("\n")[1..-1]
+        gem_list = gem_list.merge(remote_gem_list) if remote_gem_list
+      end
+      format_gem_names(gem_list)
     end
 
     def local_names
@@ -33,8 +31,8 @@ module Geminabox
 
     def versions
       return local_versions unless Geminabox.rubygems_proxy
-
-      GemVersionsMerge.merge(local_versions, remote_versions)
+      remote_versions
+      GemVersionsMerge.merge(local_versions)
     end
 
     def info(name)
@@ -46,9 +44,12 @@ module Geminabox
     end
 
     def remote_versions
-      fetch("versions") do |etag|
-        @api.fetch_versions(etag)
-      end
+      etag = cache.md5('versions')
+      @api.download_versions(etag, cache)
+    end
+
+    def read_remote_versions
+      File.read(versions_path)
     end
 
     def local_versions
@@ -75,7 +76,8 @@ module Geminabox
 
     def determine_proxy_status(verbose = nil)
       remote_version_info = VersionInfo.new
-      remote_version_info.content = remote_versions
+      remote_versions
+      remote_version_info.content = read_remote_versions
 
       local_gem_names = names_to_set(local_names).to_a
       status_and_conflicts = Parallel.map(local_gem_names, in_threads: 10) do |name|
