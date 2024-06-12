@@ -19,6 +19,7 @@ module Geminabox
           preamble = (local_time > remote_time ? local_preamble : remote_preamble)
           try_load_cached_file do |merged_versions_file|
             unless merged_versions_file.eof?
+              merged_versions_file.flock(File::LOCK_EX)
               merged_versions_preamble = merged_versions_file.readline
               merged_version_time = Time.parse(merged_versions_preamble.split[1])
               preamble_time = Time.parse(preamble.split[1])
