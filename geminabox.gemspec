@@ -32,4 +32,5 @@ Gem::Specification.new do |s|
   s.add_dependency('reentrant_flock')
   s.add_dependency('parallel')
   s.add_dependency('ruby-progressbar')
+  s.add_dependency('rubygems-generate_index', "~> 1.1")
 end
